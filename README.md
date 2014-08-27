@@ -9,8 +9,8 @@ modules. This sample project provides a starting point to create
 custom source modules.
 
 ## Project Components
-Source modules in Spring XD are [http://docs.spring.io/spring-xd/docs/1.0.0.RELEASE/reference/html/#streams]
-(defined as Spring Integration output adapters). Therefore, the creation of a custom
+Source modules in Spring XD are [defined as Spring Integration output adapters](http://docs.spring.io/spring-xd/docs/1.0.0.RELEASE/reference/html/#streams). 
+Therefore, the creation of a custom
 module requires the wiring of a Spring Integration adapter and placing it in the
 `$XD_HOME/xd/modules/source` directory.
 
