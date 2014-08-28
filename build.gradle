@@ -1,13 +1,11 @@
-description = 'Spring XD Sample Sample Module'
+description = 'Spring XD Sample Module' // TODO: Change this to match your module
 
 
 buildscript {
     repositories {
-        maven { url 'http://repo.spring.io/plugins-release' }
+        maven { url 'https://repo.spring.io/plugins-release' }
     }
     dependencies {
-        classpath 'org.springframework.build.gradle:bundlor-plugin:0.1.2'
-        classpath 'org.springframework.build.gradle:docbook-reference-plugin:0.2.4'
         classpath 'me.champeau.gradle:gradle-javadoc-hotfix-plugin:0.1'
     }
 }
@@ -16,24 +14,18 @@ group = 'org.springframework.xd'
 
 ext {
     moduleType = 'source'
-    moduleName = 'sample'
+    moduleName = 'sample' // TODO: change this to match the name of your module
 
-    //todo: clean this up later
-    slf4jVersion='1.7.7'
-    junitVersion='4.11'
-    springVersion='4.0.6.RELEASE'
-    log4jVersion='1.2.17'
-    hamcrestVersion='1.3'
+    // Your module version
     version='1.0.0.BUILD-SNAPSHOT'
-    jacksonVersion='2.3.3'
+    // The version of Spring XD you're building against
     springXDVersion='1.0.0.RELEASE'
-    mockitoVersion='1.9.5'
 }
 
 
 repositories {
-  maven { url "http://repo.spring.io/libs-snapshot" }
-  maven { url "http://repo.spring.io/plugins-release" }
+  maven { url "https://repo.spring.io/libs-snapshot" }
+  maven { url "https://repo.spring.io/plugins-release" }
   mavenCentral()
 }
 
@@ -47,108 +39,32 @@ apply plugin: 'javadocHotfix'
 
 configurations {
     dirt {}
+    compile.extendsFrom(dirt)
 }
 
-// Common dependencies
 dependencies {
-    // Logging
-    compile "org.slf4j:jcl-over-slf4j:$slf4jVersion"
-    compile "org.springframework:spring-core:$springVersion"
-    compile "org.springframework.xd:spring-xd-tuple:$springXDVersion"
-    compile "org.springframework.xd:spring-xd-module-spi:$springXDVersion"
-
-    runtime "log4j:log4j:$log4jVersion"
-    runtime "org.slf4j:jcl-over-slf4j:$slf4jVersion"
-    runtime "org.slf4j:slf4j-log4j12:$slf4jVersion"
 
     dirt "org.springframework.xd:spring-xd-dirt:$springXDVersion"
 
-    // Testing
-    testCompile "junit:junit:$junitVersion"
-    testCompile "org.springframework:spring-test:$springVersion"
-    testCompile "org.mockito:mockito-core:$mockitoVersion"
-    testCompile "org.hamcrest:hamcrest-library:$hamcrestVersion"
+    // TODO: Add/remove dependencies as you see fit to the compile, runtime, and testCompile configurations
+    // The compile scope already inherits from all libraries available in Spring XD
+    // At packaging time, only libraries that are *not* in XD will end up in your module lib/ folder
 
-}
+    compile 'org.apache.commons:commons-math:2.2' // An example lib that is NOT yet in Spring XD
 
-configurations {
-    runtime {
-        resolutionStrategy {
-            // The following is not strictly necessary but allows to align this
-            // module's and DIRT version of jars (thus removing them from the module lib/)
-            force   "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
-        }
-    }
-}
 
-javadoc {
-  ext.srcDir = file("${projectDir}/docs/src/api")
-  destinationDir = file("${buildDir}/api")
-  ext.tmpDir = file("${buildDir}/api-work")
-
-  configure(options) {
-      stylesheetFile = file("${srcDir}/spring-javadoc.css")
-      overview = "${srcDir}/overview.html"
-      docFilesSubDirs = true
-      outputLevel = org.gradle.external.javadoc.JavadocOutputLevel.QUIET
-      breakIterator = true
-      showFromProtected()
-      links = [
-        "http://static.springframework.org/spring/docs/3.1.x/javadoc-api",
-        "http://download.oracle.com/javase/6/docs/api",
-      ]
-
-      exclude "org/springframework/data/redis/config/**"
-  }
-
-  title = "${rootProject.description} ${version} API"
 }
 
 jar {
     manifest.attributes["Created-By"] = "${System.getProperty("java.version")} (${System.getProperty("java.specification.vendor")})"
-    manifest.attributes['Implementation-Title'] = 'spring-xd-source-sample'
+    manifest.attributes['Implementation-Title'] = project.name
     manifest.attributes['Implementation-Version'] = project.version
-    manifest.attributes['Implementation-URL'] = "https://github.com/spring-projects/spring-xd-modules/spring-xd-sample-module"
-    manifest.attributes['Implementation-Vendor'] = "Pivotal Software, Inc."
-    manifest.attributes['Implementation-Vendor-Id'] = "org.springframework"
-
-    from("$rootDir/docs/src/info") {
-        include "license.txt"
-        include "notice.txt"
-        include "changelog.txt"
-        into "META-INF"
-        expand(copyright: new Date().format('2014-yyyy'), version: project.version)
-    }
 }
 
-task sourcesJar(type: Jar, dependsOn:classes) {
-    classifier = 'sources'
-    from sourceSets.main.allJava
-}
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task docsZip(type: Zip) {
-    group = 'Distribution'
-    classifier = 'docs'
-    description = "Builds -${classifier} archive containing api and reference for deployment"
-
-    from('docs/src/info') {
-        include 'changelog.txt'
-    }
-
-    from (javadoc) {
-        into 'api'
-    }
-
-}
-
-task xdModule(type: Copy, dependsOn: build) {
-    def containerDeps = configurations.dirt
-    def moduleRuntime = configurations.runtime.minus(containerDeps)
+task xdModule(type: Copy, dependsOn: jar) {
+    group = 'Build'
+    description = "Builds the project as a Spring XD ${moduleType} module with the correct set of dependencies"
+    def moduleRuntime = configurations.runtime.minus(configurations.dirt)
     def moduleDir = project.file("${buildDir}/modules/${moduleType}/${moduleName}")
     inputs.property('deps', moduleRuntime)
     outputs.dir "${moduleDir}/lib"
@@ -157,7 +73,6 @@ task xdModule(type: Copy, dependsOn: build) {
 
     from(moduleRuntime) {
         into "lib"
-        exclude "jackson*.jar", "jcl*.jar", "joda*.jar", "slf4j*.jar", "spring-jdbc*.jar", "spring-web*.jar"
     }
     from(jar) {
         into "lib"
@@ -166,6 +81,7 @@ task xdModule(type: Copy, dependsOn: build) {
         into "config"
     }
 }
+build.dependsOn = ['xdModule']
 
 task xdModuleZip(type: Zip, dependsOn: xdModule) {
     group = 'Distribution'
@@ -178,47 +94,7 @@ task xdModuleZip(type: Zip, dependsOn: xdModule) {
 
 }
 
-task distZip(type: Zip, dependsOn: [jar, docsZip, sourcesJar, javadocJar, xdModuleZip]) {
-    group = 'Distribution'
-    classifier = 'dist'
-    description = "Builds -${classifier} archive, containing all jars and docs, " +
-                  "suitable for community download page."
-
-    ext.zipRootDir = "${project.name}-${project.version}"
-
-    into (zipRootDir) {
-        from('docs/src/info') {
-            include 'readme.txt'
-            include 'license.txt'
-            include 'notice.txt'
-            expand(copyright: new Date().format('yyyy'), version: project.version)
-        }
-
-        from(zipTree(docsZip.archivePath)) {
-            into "docs"
-        }
-
-        into ("dist") {
-            from rootProject.collect { project -> project.libsDir }
-            from xdModuleZip
-        }
-    }
-}
-
-tasks.withType(Test) {
-    systemProperty 'runLongTests', System.getProperty('runLongTests')
-
-    testLogging {
-        exceptionFormat = 'full'
-    }
-}
-
 artifacts {
-    archives sourcesJar
-    archives javadocJar
-
-    archives docsZip
-    archives distZip
     archives xdModuleZip
 }
 
@@ -227,6 +103,5 @@ task wrapper(type: Wrapper) {
     gradleVersion = '1.11'
 }
 
-assemble.dependsOn = ['jar', 'sourcesJar']
 defaultTasks 'build'
 
