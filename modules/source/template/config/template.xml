@@ -7,7 +7,7 @@
 
 	<channel id="output"/>
 
-	<beans:bean class="hello.Sample">
+	<beans:bean class="hello.ModuleTemplate">
 		<beans:property name="autoStartup" value="false" />
 		<beans:property name="outputChannel" ref="output" />
 	</beans:bean>

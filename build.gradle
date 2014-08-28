@@ -1,4 +1,4 @@
-description = 'Spring XD Sample Module' // TODO: Change this to match your module
+description = 'Spring XD Template Module' // TODO: Change this to match your module
 
 
 buildscript {
@@ -14,7 +14,7 @@ group = 'org.springframework.xd'
 
 ext {
     moduleType = 'source'
-    moduleName = 'sample' // TODO: change this to match the name of your module
+    moduleName = 'template' // TODO: change this to match the name of your module
 
     // Your module version
     version='1.0.0.BUILD-SNAPSHOT'

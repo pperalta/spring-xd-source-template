@@ -34,7 +34,7 @@ import org.springframework.xd.tuple.TupleBuilder;
 /**
  * @author Patrick Peralta
  */
-public class Sample extends MessageProducerSupport {
+public class ModuleTemplate extends MessageProducerSupport {
 
 	private final AtomicBoolean running = new AtomicBoolean(false);
 
@@ -43,7 +43,7 @@ public class Sample extends MessageProducerSupport {
 	private final Random random = new Random();
 
 	private final ExecutorService executorService = Executors.newSingleThreadExecutor(new CustomizableThreadFactory(
-			"source-sample"));
+			"source-template"));
 
 	@Override
 	protected void doStart() {
