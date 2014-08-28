@@ -19,7 +19,6 @@ package hello;
 import java.util.Date;
 import java.util.Locale;
 import java.util.Random;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,6 +28,7 @@ import org.springframework.format.datetime.DateFormatter;
 import org.springframework.integration.endpoint.MessageProducerSupport;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.scheduling.concurrent.CustomizableThreadFactory;
+import org.springframework.xd.tuple.Tuple;
 import org.springframework.xd.tuple.TupleBuilder;
 
 /**
@@ -42,8 +42,8 @@ public class Sample extends MessageProducerSupport {
 
 	private final Random random = new Random();
 
-	private final ExecutorService executorService =
-			Executors.newSingleThreadExecutor(new CustomizableThreadFactory("source-sample"));
+	private final ExecutorService executorService = Executors.newSingleThreadExecutor(new CustomizableThreadFactory(
+			"source-sample"));
 
 	@Override
 	protected void doStart() {
@@ -59,19 +59,20 @@ public class Sample extends MessageProducerSupport {
 		}
 	}
 
-	class SampleExecutor implements Callable<Void> {
+	class SampleExecutor implements Runnable {
 
 		@Override
-		public Void call() throws Exception {
+		public void run() {
 			DateFormatter dateFormatter = new DateFormatter("yyyy-MM-dd HH:mm:ss");
 
 			while (running.get()) {
-				TupleBuilder tupleBuilder = TupleBuilder.tuple();
-				tupleBuilder.put("sequence", sequence.getAndIncrement())
-						.put("date",  dateFormatter.print(new Date(), Locale.US))
-						.put("random", random.nextLong());
+				Tuple tuple = TupleBuilder.tuple()
+					.put("sequence", sequence.getAndIncrement())
+					.put("date", dateFormatter.print(new Date(), Locale.US))
+					.put("random", random.nextLong())
+					.build();
 
-				sendMessage(MessageBuilder.withPayload(tupleBuilder.build()).build());
+				sendMessage(MessageBuilder.withPayload(tuple).build());
 
 				try {
 					Thread.sleep(1000);
@@ -86,7 +87,6 @@ public class Sample extends MessageProducerSupport {
 				}
 			}
 
-			return null;
 		}
 	}
 
