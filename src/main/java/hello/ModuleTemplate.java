@@ -34,7 +34,7 @@ import org.springframework.xd.tuple.TupleBuilder;
 /**
  * @author Patrick Peralta
  */
-public class ModuleTemplate extends MessageProducerSupport {
+public class ModuleTemplate extends MessageProducerSupport {  // todo: rename this class to match your module name
 
 	private final AtomicBoolean running = new AtomicBoolean(false);
 
@@ -43,7 +43,7 @@ public class ModuleTemplate extends MessageProducerSupport {
 	private final Random random = new Random();
 
 	private final ExecutorService executorService = Executors.newSingleThreadExecutor(new CustomizableThreadFactory(
-			"source-template"));
+			"source-template"));  // todo: rename this thread to match your module name
 
 	@Override
 	protected void doStart() {
@@ -63,6 +63,8 @@ public class ModuleTemplate extends MessageProducerSupport {
 
 		@Override
 		public void run() {
+			// todo: your module code goes here; don't forget to invoke
+			// sendMessage to send data to the output channel
 			DateFormatter dateFormatter = new DateFormatter("yyyy-MM-dd HH:mm:ss");
 
 			while (running.get()) {
